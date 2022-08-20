@@ -28,19 +28,16 @@ const App = () => {
     var addresses_array = [];
     while (i < allNFTs.length){
       mint_address = allNFTs[i]["mintAddress"].toString();
-      console.log("mint:", mint_address);
       addresses_array.push(mint_address);
       i += 1;
     }
     
     var j=0;
-    var link_array = [];
     while (j<addresses_array.length){
       var mint = new PublicKey(addresses_array[j]);
       var nft = await metaplex.nfts().findByMint(mint).run();
       var json_file = nft.json;
       var image_link = json_file["image"];
-      console.log("Metadata: ", image_link);
       
       TEST_GIFS.push(image_link);
       j += 1;
@@ -57,16 +54,8 @@ const App = () => {
 
       if (solana) {
         if (solana.isPhantom) {
-          console.log('Phantom wallet found!');
           const response = await solana.connect({ onlyIfTrusted: true });
-          console.log("we here");
           get_nfts(response.publicKey.toString());
-          console.log("vamos");
-
-          console.log(
-            'Found Pubkey!!!!',
-            response.publicKey.toString()
-          );
           /*
            * Set the user's publicKey in state to be used later!
            */
@@ -85,7 +74,6 @@ const App = () => {
 
     if (solana) {
       const response = await solana.connect();
-      console.log('Connected with Public Key:', response.publicKey.toString());
       get_nfts(response.publicKey.toString());
       setWalletAddress(response.publicKey.toString());
     }
@@ -123,10 +111,8 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    console.log("Done Changing", doneChanging);
-    renderConnectedContainer();
     setTestGifs(TEST_GIFS);
-    console.log("Here", testGifs);
+    renderConnectedContainer();
   }, [doneChanging]);
 
   return (
