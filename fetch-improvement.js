@@ -94,13 +94,18 @@ const App = () => {
       <div className="gif-grid">
         {
           <div className="gif-item">
-            <img src={testGifs} alt={testGifs} />
-            {metadata.map(el => (
-              <p className='sub-text' key={el["trait_type"]}>{el["trait_type"]} : {el["value"]}</p>
-            ))}
-            
+            <p className='header'>Metadata:</p>
+          {metadata.map(el => (
+            <p className='sub-text' key={el["trait_type"]}>{el["trait_type"]} : {el["value"]}</p>
+          ))}
           </div>
         }
+        {
+          <div className="gif-item">
+            <img src={testGifs} alt={testGifs} />
+          </div>
+        }
+
       </div>
     </div>
   );
