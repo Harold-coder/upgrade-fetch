@@ -6,11 +6,13 @@ import { useEffect, useState } from 'react';
 
 var mint_address = "";
 var image_link = "";
+var attributes_relevant = [];
 
 const App = () => {
   // State
   const [walletAddress, setWalletAddress] = useState(null);
   const [testGifs, setTestGifs] = useState("");
+  const [metadata, setMetadata] = useState([]);
   const [doneChanging, setDoneChanging] = useState(true);
 
   const get_nfts = async (wallet_address) => {
@@ -38,9 +40,12 @@ const App = () => {
     var mint = new PublicKey(mint_address);
     var nft = await metaplex.nfts().findByMint(mint).run();
     image_link = nft.json["image"];
+    var attributes = nft.json["attributes"];
+    attributes_relevant = [];
+    attributes_relevant.push(attributes[12], attributes[6], attributes[13], attributes[14]) // Energy, Head, Pants, Cape
     setDoneChanging(!doneChanging);
 
-    return image_link;
+    return image_link, attributes_relevant;
   };
 
   // Actions
@@ -90,6 +95,10 @@ const App = () => {
         {
           <div className="gif-item">
             <img src={testGifs} alt={testGifs} />
+            {metadata.map(el => (
+              <p className='sub-text' key={el["trait_type"]}>{el["trait_type"]} : {el["value"]}</p>
+            ))}
+            
           </div>
         }
       </div>
@@ -107,6 +116,7 @@ const App = () => {
 
   useEffect(() => {
     setTestGifs(image_link);
+    setMetadata(attributes_relevant);
     renderConnectedContainer();
   }, [doneChanging]);
 
