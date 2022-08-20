@@ -4,12 +4,13 @@ import { Metaplex, keypairIdentity } from '@metaplex-foundation/js';
 import { Connection, clusterApiUrl, Keypair, PublicKey } from '@solana/web3.js';
 import { useEffect, useState } from 'react';
 
-var TEST_GIFS = [];
+var mint_address = "";
+var image_link = "";
 
 const App = () => {
   // State
   const [walletAddress, setWalletAddress] = useState(null);
-  const [testGifs, setTestGifs] = useState([]);
+  const [testGifs, setTestGifs] = useState("");
   const [doneChanging, setDoneChanging] = useState(true);
 
   const get_nfts = async (wallet_address) => {
@@ -22,29 +23,24 @@ const App = () => {
     
     const owner = new PublicKey(wallet_address);
     const allNFTs = await metaplex.nfts().findAllByOwner(owner).run();
-    
-    var i=0;
-    var mint_address = "ok";
-    var addresses_array = [];
-    while (i < allNFTs.length){
-      mint_address = allNFTs[i]["mintAddress"].toString();
-      addresses_array.push(mint_address);
+
+    // Now we will pick only the NFT that is in our collection
+
+    var i = 0;
+    while (i<allNFTs.length){
+      if (allNFTs[i]["creators"][0]["address"].toString() == "FCgPRqRxajVfTGEpJ3AJtawjMkpQCAoUcwWYRro83gTQ"){
+        mint_address = allNFTs[i]["mintAddress"].toString();
+        break
+      }
       i += 1;
     }
     
-    var j=0;
-    while (j<addresses_array.length){
-      var mint = new PublicKey(addresses_array[j]);
-      var nft = await metaplex.nfts().findByMint(mint).run();
-      var json_file = nft.json;
-      var image_link = json_file["image"];
-      
-      TEST_GIFS.push(image_link);
-      j += 1;
-    }
+    var mint = new PublicKey(mint_address);
+    var nft = await metaplex.nfts().findByMint(mint).run();
+    image_link = nft.json["image"];
     setDoneChanging(!doneChanging);
-    return TEST_GIFS;
-    
+
+    return image_link;
   };
 
   // Actions
@@ -91,12 +87,11 @@ const App = () => {
   const renderConnectedContainer = () => (
     <div className="connected-container">
       <div className="gif-grid">
-        {testGifs.map(gif => (
-          <div className="gif-item" key={gif}>
-            <img src={gif} alt={gif} />
+        {
+          <div className="gif-item">
+            <img src={testGifs} alt={testGifs} />
           </div>
-          
-        ))}
+        }
       </div>
     </div>
   );
@@ -111,7 +106,7 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    setTestGifs(TEST_GIFS);
+    setTestGifs(image_link);
     renderConnectedContainer();
   }, [doneChanging]);
 
