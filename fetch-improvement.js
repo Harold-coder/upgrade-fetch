@@ -3,10 +3,15 @@ import styles from '../styles/Home.module.css';
 import { Metaplex, keypairIdentity } from '@metaplex-foundation/js';
 import { Connection, clusterApiUrl, Keypair, PublicKey } from '@solana/web3.js';
 import { useEffect, useState } from 'react';
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+
+
 
 var mint_address = "";
 var image_link = "";
 var attributes_relevant = [];
+var wheat_amt = 0;
+var steel_amt = 0;
 
 const App = () => {
   // State
@@ -14,6 +19,42 @@ const App = () => {
   const [testGifs, setTestGifs] = useState("");
   const [metadata, setMetadata] = useState([]);
   const [doneChanging, setDoneChanging] = useState(true);
+
+  const get_tokens = async (wallet) => {
+    // connection
+    const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
+  
+    const owner = new PublicKey(wallet);
+    let response = await connection.getParsedTokenAccountsByOwner(owner, {
+      programId: TOKEN_PROGRAM_ID,
+    });
+  
+    response.value.forEach((accountInfo) => {
+      if (accountInfo.pubkey.toBase58() == "GPSn3fGmScofCKvZBYvjwU28xsiyYGBHNSNAbUdAgDks"){
+        wheat_amt = accountInfo.account.data["parsed"]["info"]["tokenAmount"]["amount"]/10;
+      }
+      if (accountInfo.pubkey.toBase58() == "EAK1iWc5Vrk8kc22xDQygEQ39hgyt6VSZtRQZVeHkvB4"){
+        steel_amt = accountInfo.account.data["parsed"]["info"]["tokenAmount"]["amount"]/10;
+      }
+      /*
+      console.log(`pubkey: ${accountInfo.pubkey.toBase58()}`);
+      console.log(`mint: ${accountInfo.account.data["parsed"]["info"]["mint"]}`);
+      console.log(
+        `owner: ${accountInfo.account.data["parsed"]["info"]["owner"]}`
+      );
+      console.log(
+        `decimals: ${accountInfo.account.data["parsed"]["info"]["tokenAmount"]["decimals"]}`
+      );
+      console.log(
+        `amount: ${accountInfo.account.data["parsed"]["info"]["tokenAmount"]["amount"]}`
+      );
+      console.log("====================");
+      */
+    });
+  };
+
+
+
 
   const get_nfts = async (wallet_address) => {
     const connection = new Connection(clusterApiUrl("devnet"));
@@ -75,6 +116,7 @@ const App = () => {
 
     if (solana) {
       const response = await solana.connect();
+      get_tokens(response.publicKey.toString());
       get_nfts(response.publicKey.toString());
       setWalletAddress(response.publicKey.toString());
     }
@@ -94,6 +136,11 @@ const App = () => {
       <div className="gif-grid">
         {
           <div className="gif-item">
+            <img src={testGifs} alt={testGifs} />
+          </div>
+        }
+        {
+          <div className="gif-item">
             <p className='header'>Metadata:</p>
           {metadata.map(el => (
             <p className='sub-text' key={el["trait_type"]}>{el["trait_type"]} : {el["value"]}</p>
@@ -102,7 +149,14 @@ const App = () => {
         }
         {
           <div className="gif-item">
-            <img src={testGifs} alt={testGifs} />
+            <img src={"https://www.arweave.net/dPXgvMQjO0dTOsYhFRLjrbg26gqV8CnpSVQ11ouIE7k?ext=png"} alt={"stp"} />
+            <p className='sub-text' key={"wheat-text"}>Amount: {steel_amt}</p>
+          </div>
+        }
+        {
+          <div className="gif-item">
+            <img src={"https://www.arweave.net/AWAp9u3qQ12kuZArgLKdNFHDDstYYQG0Z5_to5iF890?ext=png"} alt={"stp"} />
+            <p className='sub-text' key={"steel-text"}>Amount: {wheat_amt}</p>
           </div>
         }
 
@@ -143,3 +197,4 @@ const App = () => {
 };
 
 export default App;
+
